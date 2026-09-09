@@ -1,0 +1,56 @@
+{
+  "name": "franchise-fantasy-companion",
+  "version": "0.17.0-beta.1",
+  "description": "Read-only fantasy football scoring companion for Madden NFL 27 offline Franchise saves.",
+  "author": "DKedKrow",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "type": "module",
+  "main": "src/main.cjs",
+  "scripts": {
+    "extract": "node src/cli.js",
+    "inspect-save": "node scripts/inspect-save.js",
+    "start": "electron .",
+    "test": "node --test",
+    "dist": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.franchisefantasy.companion",
+    "productName": "Franchise Fantasy Companion",
+    "copyright": "Copyright © 2026 DKedKrow and contributors",
+    "directories": {
+      "output": "../../outputs/franchise-fantasy-dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/app-icon.png",
+      "CHANGELOG.md",
+      "README.md",
+      "LICENSE",
+      "package.json",
+      "node_modules/madden-franchise/**/*"
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "build/app-icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "artifactName": "Franchise-Fantasy-Companion-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Franchise-Fantasy-Companion-Portable-${version}.${ext}"
+    }
+  },
+  "dependencies": {
+    "madden-franchise": "^4.0.0"
+  },
+  "devDependencies": {
+    "electron": "^44.2.0",
+    "electron-builder": "^26.15.3"
+  }
+}

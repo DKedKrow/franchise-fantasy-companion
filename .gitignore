@@ -1,0 +1,42 @@
+# Dependencies and build products
+node_modules/
+dist/
+release/
+*.blockmap
+*.exe
+
+# Madden Franchise saves and inspection copies — never publish these
+CAREER-*
+sample-save
+*.franchise
+.tmp-*
+
+# Electron profiles, caches, and local test state
+.electron-*/
+public-beta-test-profile*/
+Microsoft/
+electron-builder-cache/
+*.log
+
+# Local/generated scratch directories
+work/
+tmp/
+scratch/
+
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# This working directory contains local inspection artifacts. Only these
+# project directories are eligible for source control.
+/*/
+!/.github/
+!/build/
+/build/*
+!/build/app-icon.png
+!/build/app-icon.ico
+!/scripts/
+!/src/
+!/test/

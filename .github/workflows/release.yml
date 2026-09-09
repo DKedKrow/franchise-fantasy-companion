@@ -1,0 +1,51 @@
+name: Build release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  windows-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - name: Ensure tag matches package version
+        shell: pwsh
+        run: |
+          $expected = "v$((Get-Content package.json | ConvertFrom-Json).version)"
+          if ($env:GITHUB_REF_NAME -ne $expected) { throw "Tag $env:GITHUB_REF_NAME does not match $expected" }
+      - name: Build Windows installer and portable app
+        run: pnpm exec electron-builder --win --config.directories.output=dist
+      - name: Generate SHA-256 checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem dist\*.exe | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            "$hash  $($_.Name)"
+          } | Set-Content dist\SHA256SUMS.txt
+      - name: Attest release executables
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: "dist/*.exe"
+      - name: Create draft prerelease
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create $env:GITHUB_REF_NAME `
+            --draft --prerelease `
+            --title "Franchise Fantasy Companion $env:GITHUB_REF_NAME" `
+            --notes-file RELEASE_NOTES.md `
+            dist\*.exe dist\SHA256SUMS.txt

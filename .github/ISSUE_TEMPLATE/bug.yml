@@ -1,0 +1,49 @@
+name: Bug report
+description: Report a reproducible problem without uploading a Franchise save
+title: "[Bug]: "
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not upload a Madden CAREER file or private filesystem paths."
+  - type: input
+    id: version
+    attributes:
+      label: Companion version
+      placeholder: 0.17.0-beta.1
+    validations:
+      required: true
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Windows version
+      options: [Windows 11, Windows 10, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include the screen and the action immediately before the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: "1. Open…\n2. Choose…\n3. Click…"
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Privacy-safe diagnostics
+      description: Paste relevant text from a support report after reviewing it. Do not attach a save.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I have not included a Franchise save or private filesystem path.
+          required: true
+

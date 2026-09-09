@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an improvement to the companion
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What should the companion add?
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: How would you use it?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      options: [Game stats, Fantasy HQ, Analytics, Fantasy League, Fantasy World, Draft, Records and awards, Settings and backups, Other]
+

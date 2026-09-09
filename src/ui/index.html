@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data: https://ratings-images-prod.pulse.ea.com" />
+    <title>Franchise Fantasy Companion</title>
+    <link rel="icon" href="../../build/app-icon.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand-lockup">
+          <img class="brand-icon" src="../../build/app-icon.png" alt="" />
+          <div>
+          <p class="eyebrow">OFFLINE FRANCHISE</p>
+          <h1>Franchise <span>Fantasy</span></h1>
+          <p class="subtitle">Automatic fantasy scores from the games you play.</p>
+          </div>
+        </div>
+        <div class="header-tools">
+          <div class="global-search-wrap">
+            <input id="global-search" type="search" placeholder="Search players, teams, or screens…" aria-label="Search the companion" autocomplete="off" />
+            <div id="global-search-results" class="global-search-results panel" hidden></div>
+          </div>
+          <button id="open-settings" class="secondary">Settings</button>
+          <div class="status" id="status"><i></i><span>Finding your Franchise save…</span></div>
+        </div>
+      </header>
+
+      <section class="controls panel">
+        <label>
+          <span>Franchise save</span>
+          <select id="save-select" aria-label="Franchise save"></select>
+        </label>
+        <button id="browse" class="secondary">Browse…</button>
+        <label>
+          <span>Scoring</span>
+          <select id="scoring" aria-label="Scoring format">
+            <option value="ppr">Full PPR</option>
+            <option value="half">Half PPR</option>
+            <option value="standard">Standard</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+        <label>
+          <span>Game team</span>
+          <select id="game-team" aria-label="Choose team for game list"></select>
+        </label>
+        <label>
+          <span>Game</span>
+          <select id="game-select" aria-label="Played game"></select>
+        </label>
+        <button id="refresh">Refresh stats</button>
+      </section>
+
+      <section id="save-health" class="save-health panel" aria-live="polite">
+        <div><p class="eyebrow">SAVE COMPATIBILITY</p><strong id="save-health-title">Checking your Franchise save…</strong><small id="save-health-detail">The original save is never modified.</small></div>
+        <span id="save-health-badge">CHECKING</span>
+      </section>
+
+      <nav class="view-tabs" aria-label="Companion view">
+        <button class="view-tab active" data-view="game">Game Stats</button>
+        <button class="view-tab" data-view="hq">Fantasy HQ</button>
+        <button class="view-tab" data-view="season">Season Hub</button>
+        <button class="view-tab" data-view="analytics">Team Analytics</button>
+        <button class="view-tab" data-view="identities">NFL Identities</button>
+        <button class="view-tab" data-view="records">Records &amp; Awards</button>
+        <button class="view-tab" data-view="league">Fantasy League</button>
+        <button class="view-tab" data-view="world">Fantasy World</button>
+      </nav>
+
+      <section id="empty" class="empty panel" hidden>
+        <h2>No played-game stats found yet</h2>
+        <p>Finish a Franchise game, return to the Franchise hub, and let Madden save. This screen will refresh automatically.</p>
+      </section>
+
+      <section id="fantasy-hq" hidden>
+        <div class="season-heading"><div><p class="eyebrow">SUNDAY COMMAND CENTER</p><h2>Fantasy HQ</h2></div><div class="stat-filters season-filters"><label><span>Season</span><select id="hq-season"></select></label><label><span>Head-to-head team</span><select id="hq-team"></select></label></div></div>
+        <div class="hq-grid">
+          <section class="panel hq-card hq-redzone"><div class="section-title"><div><p class="eyebrow">FANTASY REDZONE</p><h2 id="hq-week">Latest week</h2></div><small>Stars, shootouts, and close finishes</small></div><div id="hq-leaders" class="hq-list"></div><div id="hq-games" class="hq-list"></div></section>
+          <section class="panel hq-card"><div class="section-title"><div><p class="eyebrow">NOTIFICATION CENTER</p><h2>What needs attention</h2></div></div><div id="hq-alerts" class="hq-list"></div></section>
+        </div>
+        <div class="hq-grid lower">
+          <section><div class="section-title"><div><p class="eyebrow">LEAGUE-WIDE FORM</p><h2>NFL power rankings</h2></div><small>Results, scoring margin, and recent momentum</small></div><div class="table-wrap panel records-table"><table><thead><tr><th>#</th><th>Team</th><th>Record</th><th>PF</th><th>PA</th><th>Trend</th></tr></thead><tbody id="hq-power"></tbody></table></div></section>
+          <section><div class="section-title"><div><p class="eyebrow">RIVALRY FILE</p><h2>Head-to-head history</h2></div></div><div class="table-wrap panel records-table"><table><thead><tr><th>Opponent</th><th>Record</th><th>PF</th><th>PA</th></tr></thead><tbody id="hq-history"></tbody></table></div></section>
+        </div>
+        <section class="panel season-magazine"><p class="eyebrow">THE FRANCHISE ANNUAL</p><h2 id="hq-mag-title">Season Magazine</h2><p id="hq-mag-dek"></p><div id="hq-magazine" class="magazine-grid"></div></section>
+      </section>
+
+      <section id="results" hidden>
+        <div class="scoreboard panel">
+          <div class="team away"><span id="away-abbr">AWY</span><strong id="away-name">Away</strong></div>
+          <div class="score"><b id="away-score">0</b><em>FINAL</em><b id="home-score">0</b></div>
+          <div class="team home"><span id="home-abbr">HME</span><strong id="home-name">Home</strong></div>
+        </div>
+
+        <div class="table-heading">
+          <div><p class="eyebrow" id="game-label">LATEST GAME</p><h2>Fantasy leaderboard</h2></div>
+          <div class="stat-filters">
+            <label><span>Team</span><select id="team-filter" aria-label="Filter by team"></select></label>
+            <label><span>Position</span><select id="position-filter" aria-label="Filter by position"></select></label>
+          </div>
+        </div>
+
+        <nav class="category-tabs" aria-label="Stat category">
+          <button class="category-tab active" data-category="fantasy">Fantasy</button>
+          <button class="category-tab" data-category="passing">Passing</button>
+          <button class="category-tab" data-category="rushing">Rushing</button>
+          <button class="category-tab" data-category="receiving">Receiving</button>
+          <button class="category-tab" data-category="kicking">Kicking</button>
+          <button class="category-tab" data-category="defense">Defense</button>
+        </nav>
+
+        <div class="table-wrap panel">
+          <table>
+            <thead><tr id="table-header"></tr></thead>
+            <tbody id="leaderboard"></tbody>
+          </table>
+        </div>
+        <p class="footnote">Your save is copied before reading. The original Franchise file is never modified.</p>
+      </section>
+
+      <section id="season-dashboard" hidden>
+        <div class="season-heading">
+          <div>
+            <p class="eyebrow">FRANCHISE FANTASY</p>
+            <h2>Season Hub</h2>
+          </div>
+          <div class="stat-filters season-filters">
+            <label><span>Season</span><select id="season-filter" aria-label="Season"></select></label>
+            <label><span>Team</span><select id="season-team" aria-label="Season team filter"></select></label>
+            <label><span>Position</span><select id="season-position" aria-label="Season position filter"></select></label>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          <article class="summary-card panel"><span>Fantasy leader</span><strong id="summary-leader">—</strong><small id="summary-leader-points">—</small></article>
+          <article class="summary-card panel"><span>Highest game</span><strong id="summary-high-player">—</strong><small id="summary-high-points">—</small></article>
+          <article class="summary-card panel"><span>Games scored</span><strong id="summary-games">0</strong><small id="summary-weeks">No completed weeks</small></article>
+        </div>
+
+        <div class="table-wrap panel season-table">
+          <table>
+            <thead><tr><th>#</th><th>Player</th><th>Team</th><th>Pos</th><th>Games</th><th>Total</th><th>Avg</th><th>High</th><th>Last</th></tr></thead>
+            <tbody id="season-leaderboard"></tbody>
+          </table>
+        </div>
+        <p class="footnote">Select a player to open their fantasy game log.</p>
+      </section>
+
+      <section id="team-analytics" hidden>
+        <div class="season-heading">
+          <div>
+            <p class="eyebrow">OFFENSIVE IDENTITY</p>
+            <h2>Team Analytics</h2>
+          </div>
+          <div class="stat-filters season-filters">
+            <label><span>Season</span><select id="analytics-season" aria-label="Analytics season"></select></label>
+            <label><span>Team</span><select id="analytics-team" aria-label="Analytics team"></select></label>
+          </div>
+        </div>
+
+        <div class="summary-grid analytics-summary">
+          <article class="summary-card panel"><span>Play balance</span><strong id="analytics-balance">—</strong><small id="analytics-balance-detail">—</small></article>
+          <article class="summary-card panel"><span>Yards per game</span><strong id="analytics-ypg">—</strong><small id="analytics-ypg-detail">—</small></article>
+          <article class="summary-card panel"><span>Top receiver</span><strong id="analytics-top-player">—</strong><small id="analytics-top-share">—</small></article>
+          <article class="summary-card panel"><span>Distribution</span><strong id="analytics-concentration">—</strong><small id="analytics-concentration-detail">—</small></article>
+        </div>
+
+        <div class="analytics-grid">
+          <article>
+            <div class="section-title"><div><p class="eyebrow">WHO GETS THE BALL</p><h2>Passing distribution</h2></div><small id="analytics-passing-line">—</small></div>
+            <div class="table-wrap panel analytics-table">
+              <table>
+                <thead><tr><th>#</th><th>Receiver</th><th>Pos</th><th>Rec</th><th>Rec Share</th><th>Yds</th><th>Yds Share</th><th>Y/R</th><th>TD</th><th>YAC</th><th>Drops</th></tr></thead>
+                <tbody id="analytics-receivers"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article>
+            <div class="section-title"><div><p class="eyebrow">PERSONNEL USAGE</p><h2>By position</h2></div></div>
+            <div class="table-wrap panel compact-table">
+              <table>
+                <thead><tr><th>Pos</th><th>Rec</th><th>Share</th><th>Yds</th><th>TD</th></tr></thead>
+                <tbody id="analytics-positions"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+
+        <div class="section-title weekly-title"><div><p class="eyebrow">GAME-BY-GAME</p><h2>Weekly tendencies</h2></div></div>
+        <div class="table-wrap panel analytics-table">
+          <table>
+            <thead><tr><th>Week</th><th>Matchup</th><th>Result</th><th>Pass</th><th>Rush</th><th>Pass Rate</th><th>Pass Yds</th><th>Rush Yds</th><th>Top Receiver</th><th>Distribution</th></tr></thead>
+            <tbody id="analytics-weekly"></tbody>
+          </table>
+        </div>
+        <p class="footnote">Distribution uses completed receptions because Madden's game-stat records do not include receiving targets.</p>
+      </section>
+
+      <section id="team-identities" hidden>
+        <div class="season-heading">
+          <div><p class="eyebrow">ALL 32 TEAM DNA</p><h2>NFL Team Identities</h2></div>
+          <div class="stat-filters season-filters">
+            <label><span>Season</span><select id="identity-season" aria-label="Identity season"></select></label>
+            <label><span>Team</span><select id="identity-team" aria-label="Identity team"><option value="all">All Teams</option></select></label>
+          </div>
+        </div>
+        <div class="identity-legend panel">
+          <div><strong>24 offensive archetypes</strong><span>Volume, efficiency, personnel usage, explosiveness, distribution and quarterback role</span></div>
+          <div><strong>20 defensive archetypes</strong><span>Pressure, takeaways, run/pass resistance, tackling, scoring prevention and risk</span></div>
+          <small id="identity-confidence">Updating from completed Franchise games</small>
+        </div>
+        <div id="identity-grid" class="identity-grid"></div>
+        <p class="footnote">Each club receives three offensive and three defensive identities. They evolve automatically as more Franchise games are completed.</p>
+      </section>
+
+      <section id="records-awards" hidden>
+        <div class="season-heading">
+          <div>
+            <p class="eyebrow">FRANCHISE HISTORY</p>
+            <h2>Records &amp; Awards</h2>
+          </div>
+          <div class="stat-filters season-filters">
+            <label><span>Season</span><select id="records-season" aria-label="Records season"></select></label>
+            <label><span>Team</span><select id="records-team" aria-label="Records and awards team"></select></label>
+          </div>
+        </div>
+
+        <div id="record-cards" class="record-grid"></div>
+
+        <div class="records-layout">
+          <article>
+            <div class="section-title"><div><p class="eyebrow">SEASON EXCELLENCE</p><h2>Fantasy leaders</h2></div><small>Top totals in the selected season</small></div>
+            <div class="table-wrap panel records-table">
+              <table>
+                <thead><tr><th>#</th><th>Player</th><th>Team</th><th>Pos</th><th>Games</th><th>Total</th><th>Avg</th><th>High</th></tr></thead>
+                <tbody id="season-records"></tbody>
+              </table>
+            </div>
+          </article>
+          <article>
+            <div class="section-title"><div><p class="eyebrow">WEEKLY HONORS</p><h2>Award winners</h2></div><small id="awards-scope">Selected team</small></div>
+            <div class="table-wrap panel records-table">
+              <table>
+                <thead><tr><th>Week</th><th>Fantasy MVP</th><th>QB</th><th>Playmaker</th><th>D/ST</th></tr></thead>
+                <tbody id="weekly-awards"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+
+        <div class="section-title recap-heading"><div><p class="eyebrow">YOUR SEASON STORY</p><h2>Game recaps</h2></div><small id="recap-count">Generated locally from the Franchise save</small></div>
+        <div id="recap-list" class="recap-list"></div>
+        <div class="recap-actions"><button id="recap-more" class="secondary" hidden>Show more recaps</button></div>
+        <p class="footnote">Records cover completed games still stored in this Franchise save. Preseason is excluded.</p>
+      </section>
+
+      <section id="fantasy-league" hidden>
+        <div class="season-heading">
+          <div>
+            <p class="eyebrow">LEAGUE LAB</p>
+            <h2>Fantasy League</h2>
+          </div>
+          <div class="stat-filters league-filters">
+            <label><span>Season</span><select id="league-season" aria-label="Fantasy league season"></select></label>
+            <label id="league-week-label" hidden><span>Fantasy week</span><select id="league-week" aria-label="Fantasy league week"></select></label>
+          </div>
+        </div>
+
+        <section id="league-setup" class="league-setup panel">
+          <div class="league-setup-intro"><p class="eyebrow">CREATE A LEAGUE</p><h2>Build your fantasy format</h2><p>Snake and rolling waivers are the defaults. Auction drafting, FAAB, keeper, and dynasty formats are optional.</p></div>
+          <label><span>League name</span><input id="league-create-name" value="Franchise Fantasy League" maxlength="40" /></label>
+          <label><span>Teams</span><select id="league-team-count"><option>2</option><option selected>4</option><option>6</option><option>8</option><option>10</option><option>12</option></select></label>
+          <label><span>Draft</span><select id="league-draft-mode"><option value="snake" selected>Snake vs AI</option><option value="auction">Auction vs AI</option><option value="instant">Instant auto-draft</option></select></label>
+          <label><span>Your slot</span><select id="league-draft-slot"></select></label>
+          <label id="league-auction-budget-label"><span>Auction budget</span><input id="league-auction-budget" type="number" value="200" min="50" max="1000" /></label>
+          <label><span>Waivers</span><select id="league-waiver-type"><option value="rolling" selected>Rolling priority</option><option value="reverse">Reverse standings</option><option value="faab">FAAB bidding</option></select></label>
+          <label id="league-faab-budget-label"><span>FAAB budget</span><input id="league-faab-budget" type="number" value="100" min="1" max="1000" /></label>
+          <label><span>Playoff teams</span><select id="league-playoff-teams"><option>2</option><option selected>4</option><option>6</option></select></label>
+          <label><span>League era</span><select id="league-keeper-mode"><option value="redraft" selected>Redraft</option><option value="keeper">Keeper</option><option value="dynasty">Dynasty</option></select></label>
+          <label><span>Draft timer</span><select id="league-draft-timer"><option value="0">No timer</option><option value="30">30 seconds</option><option value="60" selected>60 seconds</option><option value="90">90 seconds</option></select></label>
+          <button id="league-mock" class="secondary">Run Mock Draft</button>
+          <button id="league-create">Create League</button>
+          <div id="league-mock-result" class="league-mock-result"></div>
+        </section>
+
+        <section id="league-draft-room" class="draft-room" hidden>
+          <div class="draft-topbar panel">
+            <div><p class="eyebrow" id="draft-format-label">LIVE SNAKE DRAFT</p><h2 id="draft-status">You’re on the clock</h2><small id="draft-on-clock">—</small></div>
+            <div class="draft-clock"><span>ROUND</span><strong id="draft-round">1</strong><span>PICK</span><strong id="draft-pick">1</strong></div>
+            <button id="draft-cancel" class="secondary">Cancel draft</button>
+            <button id="draft-pause" class="secondary">Pause draft</button>
+            <button id="draft-undo" class="secondary">Undo last turn</button>
+          </div>
+          <div class="draft-layout">
+            <article>
+              <div class="draft-toolbar">
+                <input id="draft-search" placeholder="Search players…" aria-label="Search draft players" />
+                <select id="draft-position" aria-label="Draft position filter"><option value="all">All Positions</option><option>QB</option><option>HB</option><option>WR</option><option>TE</option><option>K</option><option>DST</option></select>
+                <label id="draft-bid-label"><span>Your bid</span><input id="draft-bid" type="number" min="1" value="1" /></label>
+              </div>
+              <div id="draft-needs" class="draft-needs"></div>
+              <div class="table-wrap panel draft-pool"><table><thead><tr><th>#</th><th>Player</th><th>NFL</th><th>Pos</th><th>OVR</th><th>Avg</th><th>Season</th><th>Queue</th><th></th></tr></thead><tbody id="draft-pool"></tbody></table></div>
+            </article>
+            <aside class="draft-sidebar">
+              <section class="panel world-side-card"><p class="eyebrow">YOUR ROSTER</p><div id="draft-roster"></div></section>
+              <section class="panel world-side-card"><p class="eyebrow">DRAFT QUEUE & SCARCITY</p><div id="draft-queue"></div><div id="draft-scarcity"></div></section>
+              <section class="panel world-side-card"><p class="eyebrow">RECENT PICKS</p><div id="draft-log"></div></section>
+            </aside>
+          </div>
+        </section>
+
+        <section id="league-dashboard" hidden>
+          <div class="league-titlebar panel">
+            <div><p class="eyebrow">ACTIVE LEAGUE</p><h2 id="league-name">Fantasy League</h2></div>
+            <button id="league-reset" class="secondary">Start over</button>
+          </div>
+
+          <div class="summary-grid league-summary">
+            <article class="summary-card panel"><span>League leader</span><strong id="league-leader">—</strong><small id="league-leader-record">—</small></article>
+            <article class="summary-card panel"><span>Points leader</span><strong id="league-points-leader">—</strong><small id="league-points-total">—</small></article>
+            <article class="summary-card panel"><span>Season progress</span><strong id="league-progress">—</strong><small id="league-progress-detail">—</small></article>
+          </div>
+
+          <section id="league-manager" class="manager-panel panel">
+            <div class="manager-panel-heading">
+              <div><p class="eyebrow">YOUR TEAM</p><h2 id="league-manager-team">—</h2><small id="league-manager-status">Set your starters before playing the next Madden game.</small></div>
+              <button id="league-control" class="secondary">Take control of selected team</button>
+            </div>
+            <div id="league-lineup-editor" class="lineup-editor"></div>
+            <div class="lineup-actions"><button id="league-auto-lineup" class="secondary">Use playstyle lineup</button><button id="league-save-lineup">Save lineup</button></div>
+          </section>
+
+          <div class="league-tools-grid">
+            <section class="panel league-tool"><div class="section-title"><div><p class="eyebrow">START / SIT LAB</p><h2>Weekly outlook</h2></div></div><div id="league-projections"></div><div id="league-recommendations"></div></section>
+            <section class="panel league-tool"><div class="section-title"><div><p class="eyebrow">PLAYER MARKET</p><h2>Waiver wire</h2></div></div><div id="league-waiver-summary"></div><label><span>Add</span><select id="league-waiver-add"></select></label><label><span>Drop</span><select id="league-waiver-drop"></select></label><label id="league-waiver-bid-label"><span>Bid</span><input id="league-waiver-bid" type="number" min="0" value="0" /></label><div class="tool-actions"><button id="league-submit-claim">Submit claim</button><button id="league-process-waivers" class="secondary">Process waivers</button></div></section>
+            <section class="panel league-tool"><div class="section-title"><div><p class="eyebrow">TRADE BLOCK</p><h2>Negotiate with AI</h2></div></div><label><span>Trade partner</span><select id="league-trade-team"></select></label><label><span>You send</span><select id="league-trade-offer"></select></label><label><span>You receive</span><select id="league-trade-request"></select></label><button id="league-propose-trade">Propose trade</button><div id="league-trade-result"></div></section>
+            <section class="panel league-tool"><div class="section-title"><div><p class="eyebrow">POSTSEASON</p><h2>Playoffs & history</h2></div></div><div id="league-playoffs"></div><div id="league-history"></div></section>
+          </div>
+
+          <section class="panel league-activity"><div class="section-title"><div><p class="eyebrow">LEAGUE OFFICE</p><h2>Transactions & notifications</h2></div><button id="league-run-ai" class="secondary">Run AI roster moves</button></div><div id="league-notifications"></div><div id="league-transactions"></div></section>
+
+          <section class="panel commissioner-panel">
+            <div class="section-title"><div><p class="eyebrow">COMMISSIONER TOOLS</p><h2>League controls</h2></div><small>Manual changes are recorded and can be undone.</small></div>
+            <div class="commissioner-grid">
+              <label><span>Fantasy team</span><select id="commissioner-team"></select></label>
+              <label><span>Add free agent</span><select id="commissioner-add"></select></label>
+              <label><span>Drop player</span><select id="commissioner-drop"></select></label>
+              <button id="commissioner-swap">Force roster swap</button>
+              <label><span>Playoff teams</span><select id="commissioner-playoffs"><option>2</option><option>4</option><option>6</option></select></label>
+              <button id="commissioner-save-settings" class="secondary">Apply format</button>
+              <button id="commissioner-clear-waivers" class="secondary">Clear pending waivers</button>
+              <button id="commissioner-undo" class="secondary">Undo last manual move</button>
+            </div>
+            <div id="commissioner-result" class="commissioner-result">No commissioner changes this session.</div>
+          </section>
+
+          <div class="league-grid">
+            <article>
+              <div class="section-title"><div><p class="eyebrow">RACE FOR FIRST</p><h2>Standings</h2></div></div>
+              <div class="table-wrap panel">
+                <table><thead><tr><th>#</th><th>Fantasy team</th><th>Style</th><th>W</th><th>L</th><th>T</th><th>PF</th><th>PA</th></tr></thead><tbody id="league-standings"></tbody></table>
+              </div>
+            </article>
+            <article>
+              <div class="section-title"><div><p class="eyebrow">HEAD TO HEAD</p><h2>Matchups</h2></div></div>
+              <div id="league-matchups" class="league-matchups"></div>
+            </article>
+          </div>
+
+          <div class="roster-heading">
+            <div><p class="eyebrow">TEAM MANAGEMENT</p><h2>Roster</h2><small id="league-team-style" class="playstyle-summary">—</small></div>
+            <div class="roster-controls">
+              <select id="league-roster-team" aria-label="Fantasy roster team"></select>
+              <input id="league-team-name" maxlength="32" aria-label="Rename fantasy team" />
+              <button id="league-rename" class="secondary">Rename</button>
+            </div>
+          </div>
+          <div class="table-wrap panel league-roster-table">
+            <table><thead><tr><th>Slot</th><th>Player</th><th>NFL Team</th><th>Pos</th><th>OVR</th><th>Week</th><th>Season</th><th>Avg</th></tr></thead><tbody id="league-roster"></tbody></table>
+          </div>
+          <p class="footnote">Lineups, transactions, waivers, trades, projections, playoffs, and league history are simulated locally from your Franchise save.</p>
+        </section>
+      </section>
+
+      <section id="fantasy-world" hidden>
+        <div class="season-heading">
+          <div><p class="eyebrow">A LIVING FANTASY UNIVERSE</p><h2>Fantasy World</h2></div>
+          <div class="stat-filters"><label><span>Season</span><select id="world-season" aria-label="Fantasy world season"></select></label></div>
+        </div>
+
+        <section id="world-setup" class="world-setup panel">
+          <div class="world-intro"><p class="eyebrow">CREATE THE WORLD</p><h2>Let the season develop a life of its own</h2><p>Fictional managers draft players, compete in leagues, react to performances, form rivalries, and keep talking as your Franchise advances.</p></div>
+          <label><span>World name</span><input id="world-create-name" value="Gridiron Social" maxlength="40" /></label>
+          <label><span>Fantasy leagues</span><select id="world-league-count"><option>1</option><option selected>3</option><option>5</option></select></label>
+          <label><span>Your role</span><select id="world-mode"><option value="observe">Watch the world</option><option value="participate">Join as manager</option></select></label>
+          <label><span>Your name</span><input id="world-user-name" value="Coach D" maxlength="28" /></label>
+          <button id="world-create">Create World</button>
+        </section>
+
+        <section id="world-dashboard" hidden>
+          <div class="world-titlebar panel">
+            <div><p class="eyebrow" id="world-mode-label">OBSERVER MODE</p><h2 id="world-name">Gridiron Social</h2></div>
+            <div class="world-actions"><select id="world-join-team" aria-label="Choose a Fantasy World team"></select><button id="world-join" class="secondary">Join this team</button><button id="world-reset" class="secondary">Start over</button></div>
+          </div>
+          <div class="summary-grid world-summary">
+            <article class="summary-card panel"><span>Residents</span><strong id="world-residents">0</strong><small>Fantasy personalities</small></article>
+            <article class="summary-card panel"><span>Active leagues</span><strong id="world-leagues">0</strong><small id="world-league-detail">—</small></article>
+            <article class="summary-card panel"><span>Social activity</span><strong id="world-posts">0</strong><small id="world-post-detail">—</small></article>
+            <article class="summary-card panel"><span>Trending now</span><strong id="world-trending">—</strong><small id="world-trending-detail">—</small></article>
+          </div>
+
+          <section id="world-team-manager" class="manager-panel panel" hidden>
+            <div class="manager-panel-heading">
+              <div><p class="eyebrow">MY FANTASY TEAM</p><h2 id="world-manager-team">—</h2><small id="world-manager-status">Your starters determine your Fantasy World matchup.</small></div>
+              <label><span>Lineup week</span><select id="world-lineup-week"></select></label>
+            </div>
+            <div id="world-lineup-editor" class="lineup-editor"></div>
+            <div class="lineup-actions"><button id="world-auto-lineup" class="secondary">Use playstyle lineup</button><button id="world-save-lineup">Save lineup</button></div>
+            <div class="world-manager-tools">
+              <section class="league-tool"><p class="eyebrow">WAIVERS</p><div id="world-waiver-summary"></div><label><span>Add</span><select id="world-waiver-add"></select></label><label><span>Drop</span><select id="world-waiver-drop"></select></label><label id="world-waiver-bid-label"><span>Bid</span><input id="world-waiver-bid" type="number" min="0" value="0" /></label><div class="tool-actions"><button id="world-submit-claim">Submit claim</button><button id="world-process-waivers" class="secondary">Process</button></div></section>
+              <section class="league-tool"><p class="eyebrow">TRADES</p><label><span>Partner</span><select id="world-trade-team"></select></label><label><span>You send</span><select id="world-trade-offer"></select></label><label><span>You receive</span><select id="world-trade-request"></select></label><button id="world-propose-trade">Propose trade</button><div id="world-trade-result"></div></section>
+            </div>
+          </section>
+
+          <div class="world-layout">
+            <div class="world-feed-column">
+              <div class="world-feed-toolbar">
+                <div><p class="eyebrow">THE TIMELINE</p><h2>World feed</h2></div>
+                <nav class="category-tabs world-tabs" aria-label="World feed filter"><button class="world-tab active" data-world-filter="all">All</button><button class="world-tab" data-world-filter="player">Player talk</button><button class="world-tab" data-world-filter="fantasy">Fantasy leagues</button></nav>
+              </div>
+              <section id="world-composer" class="world-composer panel" hidden><div id="world-composer-avatar">YO</div><textarea id="world-post-text" maxlength="240" placeholder="Say something to the fantasy world…"></textarea><button id="world-post">Post</button></section>
+              <div id="world-feed" class="world-feed"></div>
+            </div>
+            <aside class="world-sidebar">
+              <section class="panel world-side-card"><p class="eyebrow">TRENDING PLAYERS</p><div id="world-trending-list"></div></section>
+              <section class="panel world-side-card"><p class="eyebrow">LEAGUE PULSE</p><div id="world-league-list"></div></section>
+              <section class="panel world-side-card"><p class="eyebrow">STORYLINES</p><div id="world-story-list"></div></section>
+              <section class="panel world-side-card"><p class="eyebrow">WORLD HISTORY</p><div id="world-history-list"></div></section>
+              <section class="panel world-side-card"><p class="eyebrow">MY MANAGER PROFILE</p><div id="world-profile"></div></section>
+              <section class="panel world-side-card"><p class="eyebrow">PEOPLE TO WATCH</p><div id="world-people-list"></div></section>
+              <section class="panel world-side-card"><p class="eyebrow">PLAYSTYLE ATLAS</p><div id="world-style-list" class="playstyle-atlas"></div></section>
+            </aside>
+          </div>
+          <p class="footnote">Fantasy World is simulated locally. Fictional managers and posts evolve automatically from completed Franchise games.</p>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="onboarding-dialog" class="utility-dialog">
+      <div class="utility-dialog-content">
+        <p class="eyebrow">WELCOME TO THE PUBLIC BETA</p>
+        <h2>Your Franchise fantasy headquarters</h2>
+        <p>The companion reads a copied version of your offline Franchise save. Your Madden file is never edited.</p>
+        <ol>
+          <li>Select or browse to a <strong>CAREER-</strong> Franchise save.</li>
+          <li>Choose your scoring format and team.</li>
+          <li>Return after Madden saves a completed game; the companion refreshes automatically.</li>
+        </ol>
+        <p class="beta-notice"><strong>Public beta:</strong> Back up your companion data periodically. This independent fan project is not affiliated with or endorsed by EA, Madden, or the NFL.</p>
+        <label><span>Default opening screen</span><select id="onboarding-view"><option value="game">Game Stats</option><option value="hq">Fantasy HQ</option><option value="season">Season Hub</option><option value="records">Records &amp; Awards</option><option value="league">Fantasy League</option><option value="world">Fantasy World</option></select></label>
+        <div class="dialog-actions"><button id="onboarding-finish">Start using the companion</button></div>
+      </div>
+    </dialog>
+
+    <dialog id="settings-dialog" class="utility-dialog">
+      <div class="utility-dialog-heading"><div><p class="eyebrow">COMPANION CONTROL CENTER</p><h2>Settings & data</h2></div><button id="settings-close" class="icon-button" aria-label="Close settings">×</button></div>
+      <div class="utility-dialog-content settings-grid">
+        <section>
+          <h3>Experience</h3>
+          <label><span>Default opening screen</span><select id="settings-default-view"><option value="game">Game Stats</option><option value="hq">Fantasy HQ</option><option value="season">Season Hub</option><option value="analytics">Team Analytics</option><option value="identities">NFL Identities</option><option value="records">Records &amp; Awards</option><option value="league">Fantasy League</option><option value="world">Fantasy World</option></select></label>
+          <label><span>All-team recaps per page</span><select id="settings-recap-size"><option>10</option><option selected>20</option><option>30</option><option>50</option></select></label>
+          <label class="check-row"><input id="settings-auto-refresh" type="checkbox" checked /><span>Refresh when Madden updates the save</span></label>
+          <h3>Custom scoring</h3>
+          <div class="custom-scoring-grid">
+            <label><span>Reception</span><input id="custom-ppr" type="number" min="0" max="3" step="0.25" value="1" /></label>
+            <label><span>Pass TD</span><input id="custom-pass-td" type="number" min="0" max="12" step="0.5" value="4" /></label>
+            <label><span>Rush/Rec TD</span><input id="custom-skill-td" type="number" min="0" max="12" step="0.5" value="6" /></label>
+            <label><span>Interception</span><input id="custom-int" type="number" min="-10" max="0" step="0.5" value="-2" /></label>
+          </div>
+          <button id="settings-save">Save settings</button>
+        </section>
+        <section>
+          <h3>Backup & recovery</h3>
+          <p>Backups include fantasy leagues, Fantasy Worlds, and companion preferences—not your Madden save.</p>
+          <div class="dialog-actions left"><button id="backup-export">Export backup</button><button id="backup-import" class="secondary">Restore backup</button></div>
+          <h3>Support</h3>
+          <p id="app-version">Franchise Fantasy Companion</p>
+          <button id="diagnostics-export" class="secondary">Create support report</button>
+          <p class="privacy-copy">Your Franchise save is copied to a temporary folder only while it is read. Fantasy data stays on this PC. The app includes no analytics or advertising.</p>
+          <h3>What’s new</h3>
+          <details><summary>Version 0.17.0-beta.1</summary><p>First public beta with branded Windows builds, a guided public first run, release documentation, privacy disclosures, and distribution checksums.</p></details>
+          <details><summary>Version 0.16.0</summary><p>Fantasy HQ, RedZone, NFL power rankings, rivalry history, season magazine, expanded records, player timelines, custom scoring, and draft controls.</p></details>
+          <details><summary>Version 0.15.0</summary><p>Onboarding, compatibility checks, backups, diagnostics, global search, recap pagination, and commissioner tools.</p></details>
+          <div id="settings-result" class="commissioner-result"></div>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog id="player-dialog">
+      <div class="dialog-heading">
+        <div class="profile-identity">
+          <div class="portrait-frame">
+            <img id="dialog-portrait" alt="" hidden />
+            <span id="dialog-portrait-fallback">—</span>
+          </div>
+          <div><p class="eyebrow" id="dialog-team">PLAYER</p><h2 id="dialog-player">Game log</h2></div>
+        </div>
+        <button id="dialog-close" class="icon-button" aria-label="Close player game log">×</button>
+      </div>
+      <div class="profile-kpis">
+        <div><span>Season points</span><strong id="dialog-total">0.00</strong></div>
+        <div><span>Average</span><strong id="dialog-average">0.00</strong></div>
+        <div><span>Season high</span><strong id="dialog-high">0.00</strong></div>
+        <div><span>Consistency</span><strong id="dialog-consistency">—</strong><small id="dialog-consistency-score">—</small></div>
+      </div>
+      <div class="profile-content">
+        <section class="profile-chart-section">
+          <div class="profile-section-heading"><h3>Fantasy trend</h3><small>Points by game</small></div>
+          <svg id="dialog-chart" class="fantasy-chart" viewBox="0 0 760 190" role="img" aria-label="Weekly fantasy points chart"></svg>
+        </section>
+        <div class="profile-detail-grid">
+          <section>
+            <div class="profile-section-heading"><h3>Production</h3><small>Share in games played</small></div>
+            <div id="dialog-production" class="profile-stat-grid"></div>
+          </section>
+          <section>
+            <div class="profile-section-heading"><h3>Madden ratings</h3><small id="dialog-rating-meta">Current roster</small></div>
+            <div id="dialog-ratings" class="rating-grid"></div>
+          </section>
+        </div>
+        <div class="profile-section-heading log-heading"><h3>Game log</h3><small id="dialog-log-summary">—</small></div>
+        <div class="profile-section-heading log-heading"><h3>Player timeline</h3><small>Milestones from this Franchise save</small></div>
+        <div id="dialog-timeline" class="player-timeline"></div>
+      </div>
+      <div class="table-wrap profile-log">
+        <table>
+          <thead><tr><th>Week</th><th>Matchup</th><th>Result</th><th>Stat line</th><th>Fantasy</th></tr></thead>
+          <tbody id="dialog-games"></tbody>
+        </table>
+      </div>
+    </dialog>
+    <script type="module" src="renderer.js"></script>
+  </body>
+</html>
