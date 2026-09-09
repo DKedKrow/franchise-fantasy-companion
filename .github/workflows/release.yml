@@ -27,7 +27,7 @@ jobs:
           $expected = "v$((Get-Content package.json | ConvertFrom-Json).version)"
           if ($env:GITHUB_REF_NAME -ne $expected) { throw "Tag $env:GITHUB_REF_NAME does not match $expected" }
       - name: Build Windows installer and portable app
-        run: pnpm exec electron-builder --win --config.directories.output=dist
+        run: pnpm exec electron-builder --win --publish never --config.directories.output=dist
       - name: Generate SHA-256 checksums
         shell: pwsh
         run: |
