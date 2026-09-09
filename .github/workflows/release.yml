@@ -36,7 +36,7 @@ jobs:
             "$hash  $($_.Name)"
           } | Set-Content dist\SHA256SUMS.txt
       - name: Attest release executables
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: "dist/*.exe"
       - name: Create draft prerelease
