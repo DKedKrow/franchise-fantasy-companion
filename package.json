@@ -50,7 +50,7 @@
     "madden-franchise": "^4.0.0"
   },
   "devDependencies": {
-    "electron": "^44.2.0",
+    "electron": "^44.4.5",
     "electron-builder": "^26.15.3"
   }
 }
